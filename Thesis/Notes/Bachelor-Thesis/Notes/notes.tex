@@ -1,0 +1,181 @@
+
+\documentclass[12pt]{article}
+
+
+\usepackage{fancyhdr}
+\usepackage{subfigure}
+
+
+\usepackage{float}
+\restylefloat{figure}
+
+\usepackage{ccfonts} 
+
+\usepackage[english]{babel}
+
+\usepackage{ucs}
+\usepackage[T1]{fontenc}
+
+\usepackage{hyphenat}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{xspace,hyphenat}
+
+\usepackage{calc}
+
+\usepackage{textcomp}
+\usepackage{eurosym}
+
+\usepackage{url}
+\usepackage{extarrows}
+\usepackage{cite}
+
+
+
+
+
+\newcommand{\inputfigure}[2]{\resizebox{#1}{!}{\input{pics/#2.pdftex_t}}}
+
+
+\pdfoutput=1
+\usepackage[pdftex]{graphicx, color, rotating}
+\usepackage{subfigure}
+\usepackage[pdftex=true, bookmarks=true, colorlinks=true, bookmarksnumbered=true,
+plainpages=false]{hyperref}
+\graphicspath{{./bilder/}}
+\DeclareGraphicsExtensions{.jpg,.png,.pdf}
+\pdfcompresslevel=9
+\pdfinfo{
+  /Title (Notes)
+  /Author (Joaquin Arias)
+  /Subject (Thesis Notes)
+}
+
+
+
+\begin{document}
+
+
+\pagenumbering{roman}
+\textheight600pt
+\topmargin0pt
+\voffset0pt
+\selectlanguage{english}
+\headheight100pt
+\headsep=100pt
+\footskip=100pt
+\sloppy
+\title{\vspace{-2cm}Notes
+\vspace{1cm}
+
+
+\vspace{0.5cm}
+}
+\author{Joaquin Arias}
+
+\lhead{
+\includegraphics[width=0.7\textwidth]{DFKI_Schrift}
+
+}
+
+
+\maketitle
+
+\vspace*{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+\headheight0pt
+\headsep20pt
+\footskip36pt
+
+\newpage
+
+\pagenumbering{arabic}
+
+
+\section{Comprehensive Overview of Functions and Parameters}
+\date{04/03/2024}
+\subsection{Commulative Reward}
+The reward determines how good the action from the state s to reach the next state. This is the crucial component of RL that determines the learning of the RL agent. On the other hand, the return is the cumulative sum of weighted rewards from the current state to the goal state. 
+
+\[R(\tau)=r_{t+1}+\gamma r_{t+2}+\gamma^{2} r_{t+3}+...\]
+
+\[R(\tau)=\sum_{k=0}^{\infty} \gamma^{k}r_{t+k+1}\]
+
+Where $\tau$ is the trajectory (sequence of states and actions) and the discount rate is $0\leq \gamma \leq 1$ (usually $\gamma$ is 0.95 or 0.99).
+Large $\gamma \Rightarrow$ less discount $\Rightarrow$ agent cares more about long-term rewards.
+Smaller $\gamma \Rightarrow$ more discount $\Rightarrow$ agent cares more about short-term rewards~\cite{Simonini18}.
+
+\subsection{Learning Details}
+\textbf{Proposed Model Sketch:}
+
+\begin{figure}[H] 
+  \centering
+  \includegraphics[width=0.7\textwidth]{Bilder/model_sketch.jpeg}
+  \caption{Model Sketch.}
+  \label{fig:aps}
+\end{figure}
+\textbf{Action Space:}
+\begin{itemize}
+\item Rotation of the panning shoulder.
+\item Rotation of the shoulder lifting joint.
+\item Rotation of the forearm flexing joint.
+\end{itemize}
+An action $(a,b)$ represents the torques applied at the joints. \\
+
+\textbf{Observation Space:}
+\begin{itemize}
+\item Angle of the joints on the arm (3).
+\item Angular velocities of these joints (3).
+\item Coordinates of the tip of the arm (3).
+\item Coordinates of the object to be pushed (3).
+\item Coordinates of the goal (3).
+\end{itemize}
+This gives us a `ndarray` observation space of shape `(15,)` \\
+
+\textbf{Rewards:}
+\begin{itemize}
+\item reward\_near: measure of how far the tip is from the object. 
+\[reward\_near=-\|P_{tip}-P_{object}\|\]
+\item reward\_dist: measure of how far the object is from the goal. 
+\[reward\_dist=-\|P_{object}-P_{goal}\|\]
+\item reward\_speed: measure of how fast the reaches the goal. 
+\[reward\_speed=\frac{reward\_dist_{t-1}-reward\_dist_{t}}{\Delta t}\]
+
+\item reward\_control: negative reward if the robot takes too large actions.
+\[reward\_control=-\|a\|^2=-\sum_{i=1}^{n}a_{i}^{2}\]
+Where $a_{i}$ is the $i$-th component of the action vector and $n$ is the dimensionality of the action space.
+\end{itemize} 
+
+\textbf{Training:}
+
+In QD methods, solutions $x_i\in \chi$ encode parameters for policies $\pi_{x_{i}}$ for an agent that interacts in a sequential environment at discrete time-steps $t$. Each time-step:
+\[
+agent \xlongrightarrow[\text{and chooses action $a_{t}$}]{\text{observes $s_{t}$}} s_{t+1}, r_{t}
+\]
+
+The policy determines which action is taken in each time-step $\mathbb{P}\left[a_{t}|s_{t} \right]$. To measure how good this policy is, we define an objective function $J(x)$ which outputs the expected cumulative reward of the agent over the whole time frame ($T$ time-steps):
+\[
+J(x)=\sum_{j=0}^{T} \gamma^{j}r(s_{j}, a_{j})
+\]
+To improve the optimization process, as solutions are evaluated, transition tuples $(s_{t}, a_{t}, s_{t+1}, a_{t+1})$ are stored in a replay buffer $\mathcal{B}$. With these, we train a critic network that approximates:
+\[
+Q(s_{t}, a_{t})=\mathbb{E}\left[ \sum_{j=t}^{T} \gamma^{j}r(s_{j}, a_{j})\right],
+\] 
+which is the action-value function that captures the value of taking an action $a_{t}$ from the state $s_{t}$.
+These critic estimates can be used to form a policy gradient estimate:
+\[
+\nabla_{x_{i}}J_{x_{i}}=\mathbb{E}\left[ \nabla_{x_{i}}\pi_{x_{i}}(s)\nabla_{a}Q_{\theta}(s, a)|_{a=\pi_{x_{i}}(s)}\right],
+\] 
+where $Q_{\theta}$ is the critic network~\cite{Tsou_2021}. Here we can see that the policy gradient provides the direction in which a solution $x_{i}$ should be updated in order to maximize the reward of the agent. 
+In each iteration, some solutions are mutated via gradient-based updates and, to maintain exploration, others are mutated via genetic mutations~\cite{Janmohamed_2023}. \\
+
+\subsection{Why Quality-Diversity:}
+To better understand the advantages of QD algorithms over traditional methods, consider the task of training a robot to grasp objects of various shapes and sizes while avoiding collisions with obstacles. The task involves multiple conflicting objectives, such as maximizing the success rate of grasping objects, minimizing the time taken to complete a task, and avoiding collisions. Also the environment is highly dynamic, with objects being added or removed over time. PPO focuses on optimizing a single policy to maximize the cumulative reward. However, it can get stuck at the local optima, without really exploring other potentially better solutions. With MOME-PGX instead, we can explore a wide range of grasping strategies and object interactions, discovering diverse solutions. We can also optimize multiple objectives. 
+
+\bibliography{references}{}
+\bibliographystyle{plain}
+
+\end{document}

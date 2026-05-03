@@ -1,0 +1,198 @@
+
+\documentclass[12pt]{article}
+
+
+\usepackage{fancyhdr}
+\usepackage{subfigure}
+
+
+\usepackage{float}
+\restylefloat{figure}
+
+\usepackage{ccfonts} 
+
+\usepackage[english]{babel}
+
+\usepackage{ucs}
+\usepackage[T1]{fontenc}
+
+
+
+\usepackage{hyphenat}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath,amssymb}
+\usepackage{xspace,hyphenat}
+\usepackage{calc}
+
+\usepackage{textcomp}
+\usepackage{eurosym}
+
+\usepackage{url}
+\usepackage{amssymb}
+
+\newcommand{\inputfigure}[2]{\resizebox{#1}{!}{\input{pics/#2.pdftex_t}}}
+
+
+\pdfoutput=1
+\usepackage[pdftex]{graphicx, color, rotating}
+\usepackage{subfigure}
+\usepackage[pdftex=true, bookmarks=true, colorlinks=true, bookmarksnumbered=true,
+plainpages=false]{hyperref}
+\graphicspath{{./bilder/}}
+\DeclareGraphicsExtensions{.jpg,.png,.pdf}
+\pdfcompresslevel=9
+\pdfinfo{
+  /Title (Thesis Proposal)
+  /Author (Joaquin Arias)
+  /Subject (Project Proposal)
+}
+
+
+
+\begin{document}
+
+
+\pagenumbering{roman}
+\textheight600pt
+\topmargin0pt
+\voffset0pt
+\selectlanguage{english}
+\headheight100pt
+\headsep=100pt
+\footskip=100pt
+\sloppy
+\title{\vspace{-4cm}Proposal for Bachelor Thesis\\
+\vspace{0.5cm}
+\textbf{Enhancing Robustness and Adaptability in Robotic Systems: A Quality-Diversity Approach to Addressing Wrong Initial Simulation Parameters and Optimizing Model Parameters}
+\vspace{0.5cm}
+
+
+\vspace{0.2cm}
+}
+\author{
+\vspace{0.5cm}
+Joaquin Arias (Matr.-No.: 30005300) \\
+Robotics and Intelligent Systems (B.Sc.) \\
+Constructor University}
+
+
+
+
+\lhead{
+\includegraphics[width=0.5\textwidth]{Bilder/DFKI_Schrift}%
+\includegraphics[width=0.5\textwidth]{Bilder/Constructor}
+}
+
+
+\maketitle
+
+\begin{center}
+
+    
+    \textbf{1st Examiner:} \\
+     Prof. Dr. Dr. h.c. Frank Kirchner \\
+    % \href{mailto:Frank.Kirchner@dfki.de}{Frank.Kirchner@dfki.de} \\
+     \vspace{0.3cm}
+    \textbf{2nd Examiner:} \\
+     Prof. Dmitry Kropotov \\
+    % \href{mailto:dkropotov@constructor.university}{dkropotov@constructor.university} \\
+     \vspace{0.3cm}
+    \textbf{Supervisors:} \\
+     M.Sc. Marc Otto \\
+     % \href{mailto:Marc.Otto@dfki.de}{Marc.Otto@dfki.de} \\
+      
+      Prof. Dr. Dr. h.c. Frank Kirchner \\
+       %\href{mailto:Frank.Kirchner@dfki.de}{Frank.Kirchner@dfki.de}
+
+
+\end{center}
+
+\vspace*{0.5cm}
+\hrule
+\vspace{0.5cm}
+\thispagestyle{fancy}
+
+\newpage
+\headheight0pt
+\headsep20pt
+\footskip36pt
+
+
+\newpage
+
+\pagenumbering{arabic}
+
+\section{Introduction}
+When a robot needs to adapt after being damaged or encounters an unexpected environmental element, it needs to adapt effectively. In these cases, traditional optimization methods that only seek one solution $x$ from a search space $\chi$ that maximizes an objective function $f:\chi \rightarrow \mathbb{R}$ are not optimal. Instead, an approach involving the use of Quality-Diversity (QD) algorithms has been introduced. With this approach, the robot can obtain a set of diverse and effective solutions for adaptation $x_i \in X$ by using a descriptor function $c:\chi \rightarrow \mathbb{R}^{d}$. The QD-algorithm approach has also proven effective for situations in which only one solution is needed, as the diverse solutions result in higher performance by preventing the optimization process from getting stuck at local minima.
+
+To use QD algorithms in cases with multiple objectives, the Multi-Objective MAP-Elites (MOME) was introduced. Each set of solutions found by Multi-Objective (MO) algorithms (known as the Pareto front) represents a different optimal trade-off of the objectives. What MOME does is finding many Pareto fronts from different regions in the behavior space.
+
+Furthermore, Multi-Objective MAP-Elites with Policy-Gradient Assistance and Crowding-based Exploration (MOME-PGX) was presented as a way to increase performance and data efficiency by adapting the solutions, considering gradient information to guide the search towards more optimal regions, and employing crowding-based criteria to increase exploration in sparse regions of the objective space~\cite{Janmohamed_2023}.
+\begin{figure}[h] 
+  \centering
+  \includegraphics[width=0.5\textwidth]{Bilder/MOME-PGX}
+  \caption{MOME-PGX Algorithm~\cite{Janmohamed_2023}.}
+  \label{fig:aps}
+\end{figure}
+
+
+\section{Motivation}
+In real life, environments and their events are not constant, they are always changing due to several factors. For example, if the robot is damaged, if it loses a finger or a leg, it should be able to quickly adapt despite having an internal model that does not reflect the new circumstances, yet. 
+
+Quality-Diversity (QD) algorithms have been successful when providing a diverse set of effective solutions for adaptation. However, this set of solutions are less useful when the simulation model that it was generated with has important inaccuracies. This prompts two research questions: 
+\begin{itemize}
+\item To what extent do inaccuracies in the simulation model impact the performance of QD algorithms?
+\item Can we improve the model faster and more efficiently by leveraging the exploration behaviors learned during the process?
+\end{itemize}
+For the evaluation, a new objective can be added within the multi-objective optimization to enhance the exploration and parameter estimation, but use the data for optimization the same way as a standard approach. That means, for example, that there are a two-objective QD map (standard), and a three-objective one (the proposed approach) in which one of the objectives is for exploration. The goal is to explore whether the diversity of the QD map improves the possibility of optimizing model parameters compared to a baseline that has the same effort and number of results as the proposed approach.
+
+
+Additionally, the inclusion of an ensemble model disagreement measure that approximates the model uncertainty in Pareto optimization may be considered to determine if it can improve the robustness to parameter inaccuracy.
+
+To carry out this research, a scenario needs to be defined. For the sake of simplicity, the simulated robot will be a modified version of the ant model provided by Brax and it will have as main objective pushing an object to a goal.
+\begin{figure}[h] 
+  \centering
+  \includegraphics[width=0.7\textwidth]{Bilder/ant}
+  \caption{Ant Model.}
+  \label{fig:aps}
+\end{figure}
+
+
+The additional objectives will be to do it efficiently (minimizing its energy consumption) and accurately (final placement error). For inaccurate simulation parameters, the environmental conditions can be changed, such as adding obstacles. The inaccurate modeling of the robot's actuators can also be relevant, for example to simulate damage in the joints. 
+
+Prior to the submission of this proposal, the model Walker2d was evaluated using MOME PGX and it took 19 hours to finish 4000 iterations with the task of walking as fast as possible and minimizing the use of energy, which is enough to fill a behavior performance map. If it is necessary to reduce the complexity of the proposed simulation in order to realistically do several experiments with different parameters, the ant model can be modified in a way such that three of its legs are fixed and static, and it only uses one to push the object. In this way, it could be faster evaluated.
+
+\section{Procedure}
+Below are the steps to be performed:
+\begin{itemize}
+\item Gain a comprehensive understanding of the QD and MOME-PGX algorithms and evaluate their source code.
+\item Create an environment and a robot to be simulated.
+\item Define the set of objectives, scenarios and challenges that the robot is going to face.
+\item Evaluate the performance of the robot only using a two-objective QD map (baseline) and a three-objective one.
+\item Compare the results with respect to the proposed research questions/ metrics.
+\end{itemize}
+
+\section{Time Plan}
+The time required to finish this thesis project is 4 months. The table below shows the expected time distribution:
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{p{6cm}|cl}
+\textbf{Time} 	& \textbf{Description} \\ \hline \hline
+0.5 months 	& Algorithm source code evaluation    \\ \hline
+0.5 months 	& Environment and robot creation   \\ \hline
+0.5 months	& Defining the robot's parameters and objectives   \\ \hline
+0.5 months	& Traditional methods evaluation           \\ \hline 
+1 month		& Algorithm implementation and evaluation     \\ \hline 
+1 month		& Writing the thesis
+\end{tabular}
+\end{center}
+\caption{Time distribution for bachelor thesis \label{tab:aps}}
+\end{table}
+
+ 
+\bibliographystyle{apalike}
+\bibliography{references.bib}
+
+\end{document}

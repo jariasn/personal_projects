@@ -1,0 +1,20 @@
+{
+    "crop_single_object": {
+        "system": {
+            "en": "Welcome!",
+            "es": "¡Bienvenido!"
+        },
+        "error": {
+            "en": "An error occurred.",
+            "es": "Se produjo un error."
+        },
+        "success": {
+            "en": "Operation successful.",
+            "es": "Operación exitosa."
+        },
+        "warning": {
+            "en": "Warning: Proceed with caution.",
+            "es": "Advertencia: Proceder con precaución."
+        }
+    }
+}
